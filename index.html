@@ -750,8 +750,11 @@
         var stars = round1(bestAvg * 5);
         var bestRh = bestWindow.reduce(function (a, h) { return a + h.rh; }, 0) / bestWindow.length;
         if (bestRh >= 90) stars = Math.min(stars, 3.0);
-        var best = climb[0];
-        climb.forEach(function (h) { if (h.score > best.score) best = h; });
+        // Peak hour: the highest-scoring dry hour, so it never points at a damp hour the window avoided.
+        var best = null;
+        climb.forEach(function (h) {
+          if (!best || (!h.damp && best.damp) || (h.damp === best.damp && h.score > best.score)) best = h;
+        });
         var dampHours = bestWindow.filter(function (h) { return h.damp; }).length;
         // Rain totals are the 24 h / 48 h leading up to the start of the best window.
         var start = bestWindow[0];
