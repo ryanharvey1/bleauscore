@@ -212,7 +212,8 @@
       .day-card .d-score{display:flex;align-items:baseline;gap:7px;margin-top:8px}
       .day-card .d-stars{font-family:"Bitter",serif;font-weight:800;font-size:27px;line-height:1}
       .day-card .d-stars small{font-size:14px;color:var(--muted);font-weight:700}
-      .day-card .d-mini{font-size:11px;color:var(--star);letter-spacing:1px;line-height:1}
+      .day-card .d-mini{position:relative;display:inline-block;font-size:11px;letter-spacing:1px;line-height:1;color:var(--star-track)}
+      .day-card .d-mini .fill{position:absolute;left:0;top:0;color:var(--star);overflow:hidden;white-space:nowrap}
       .day-card .d-verdict{display:inline-flex;align-items:center;gap:6px;margin-top:9px;font-size:11.5px;font-weight:800;letter-spacing:.05em;padding:4px 9px;border-radius:999px}
       .day-card .d-verdict .dot{width:7px;height:7px;border-radius:50%;background:currentColor}
       .d-verdict.go{background:var(--go-bg);color:var(--go-ink)}
@@ -734,13 +735,16 @@
 
       function scoreDay(rows, dateStr) {
         var dayRows = rows.filter(function (r) { return r.dateStr === dateStr; });
-        var climb = dayRows.filter(function (r) { return r.hour >= 9 && r.hour <= 17; });
+        // Hourly samples 09:00–16:00, each standing for the hour it starts, so every window ends by 17:00.
+        var climb = dayRows.filter(function (r) { return r.hour >= 9 && r.hour <= 16; });
         if (!climb.length) return null;
-        var bestWindow = null, bestAvg = -1;
+        // Prefer the best window with no damp hour; only fall back to a damp one if every window has one.
+        var bestWindow = null, bestAvg = -1, bestDry = false;
         for (var i = 0; i + 3 <= climb.length; i++) {
           var w = climb.slice(i, i + 3);
           var avg = (w[0].score + w[1].score + w[2].score) / 3;
-          if (avg > bestAvg) { bestAvg = avg; bestWindow = w; }
+          var dry = !w[0].damp && !w[1].damp && !w[2].damp;
+          if ((dry && !bestDry) || (dry === bestDry && avg > bestAvg)) { bestAvg = avg; bestWindow = w; bestDry = dry; }
         }
         if (!bestWindow) { bestWindow = climb.slice(0, Math.min(3, climb.length)); bestAvg = bestWindow.reduce(function (a, h) { return a + h.score; }, 0) / bestWindow.length; }
         var stars = round1(bestAvg * 5);
@@ -749,7 +753,8 @@
         var best = climb[0];
         climb.forEach(function (h) { if (h.score > best.score) best = h; });
         var dampHours = bestWindow.filter(function (h) { return h.damp; }).length;
-        var last = climb[climb.length - 1];
+        // Rain totals are the 24 h / 48 h leading up to the start of the best window.
+        var start = bestWindow[0];
         var v = verdictFor(stars, dampHours > 0);
         var compAvg = { temp: 0, humidity: 0, dryness: 0, wind: 0, sun: 0 };
         bestWindow.forEach(function (h) {
@@ -760,7 +765,7 @@
         return {
           dateStr: dateStr, climb: climb, bestWindow: bestWindow, best: best,
           stars: stars, bestRh: bestRh, dampHours: dampHours,
-          rain24: last.rain24, rain48: last.rain48,
+          rain24: start.rain24, rain48: start.rain48,
           verdict: v, compAvg: compAvg
         };
       }
@@ -870,24 +875,35 @@
         els.errorMsg.textContent = t("errorWith", { e: t(lastError.key, lastError.vars) });
       }
 
-      var refreshInFlight = false;
+      // One fetch per sector at a time; switching sectors mid-fetch is always allowed.
+      var inFlight = {};        // sectorId -> true while its fetch runs
+      function syncRefreshBtn() {
+        var busy = !!inFlight[currentSector.id];
+        els.refreshBtn.classList.toggle("spinning", busy);
+        els.refreshBtn.disabled = busy;
+      }
       function loadSector(sector, force) {
-        // Ignore taps while a fetch is already running.
-        if (refreshInFlight) return Promise.resolve();
+        var switching = sector.id !== currentSector.id;
         currentSector = sector;
         renderTabs();
         els.sectorCoords.textContent = sector.lat.toFixed(4) + ", " + sector.lon.toFixed(4) + " · bleau.info";
         syncUrl();
+        syncRefreshBtn();
+        if (switching) hideNote();
         var cached = cache[sector.id];
+        if (inFlight[sector.id]) {
+          // Already loading this sector: show what we have and let that fetch finish.
+          if (cached) render(cached); else showState("loading");
+          return Promise.resolve();
+        }
         if (!force && cached && !isStale(cached)) {
           render(cached);
           return Promise.resolve();
         }
         // Keep showing older data while a refetch runs; otherwise spin.
         if (cached) render(cached); else showState("loading");
-        refreshInFlight = true;
-        els.refreshBtn.classList.add("spinning");
-        els.refreshBtn.disabled = true;
+        inFlight[sector.id] = true;
+        syncRefreshBtn();
         if (force) showNote("", t("noteRefreshingB"), t("noteRefreshing"), 0);
         // Re-anchor "today" at fetch time so a page left open overnight scores the right days.
         var today = parisTodayStr();
@@ -900,17 +916,17 @@
             if (days.some(function (d) { return !d; })) throw fetchErr("err.coverage");
             var entry = { days: days, fetchedAt: new Date() };
             cache[sector.id] = entry;
-            refreshInFlight = false;
-            els.refreshBtn.classList.remove("spinning");
-            els.refreshBtn.disabled = false;
-            if (sector.id === currentSector.id) render(entry);
+            delete inFlight[sector.id];
+            if (sector.id !== currentSector.id) return;   // user moved on; data is cached for later
+            syncRefreshBtn();
+            render(entry);
             if (force) showNote("ok", t("noteUpdatedB", { t: parisTimeStr(entry.fetchedAt) }), t("noteUpdated"), 8000);
             else hideNote();
           })
           .catch(function (err) {
-            refreshInFlight = false;
-            els.refreshBtn.classList.remove("spinning");
-            els.refreshBtn.disabled = false;
+            delete inFlight[sector.id];
+            if (sector.id !== currentSector.id) return;
+            syncRefreshBtn();
             var existing = cache[sector.id];
             if (existing) {
               existing.liveFailed = true;
@@ -958,11 +974,14 @@
         var endHour = w[w.length - 1].hour + 1;
         return start + " – " + (endHour < 10 ? "0" : "") + endHour + ":00";
       }
-      function miniStars(stars) {
-        var full = Math.round(stars);
-        var s = "";
-        for (var i = 0; i < 5; i++) s += i < full ? "★" : "☆";
-        return s;
+      // Same partial fill as the hero stars, so 4.5 shows four and a half stars, not five.
+      function miniStars(el, stars) {
+        el.replaceChildren();
+        el.setAttribute("aria-hidden", "true");
+        var track = document.createElement("span"); track.textContent = "★★★★★";
+        var fill = document.createElement("span"); fill.className = "fill"; fill.textContent = "★★★★★";
+        fill.style.width = (Math.max(0, Math.min(5, stars)) / 5 * 100) + "%";
+        el.appendChild(track); el.appendChild(fill);
       }
       function valWithUnit(el, value, unit) {
         el.replaceChildren();
@@ -993,7 +1012,7 @@
           dStars.textContent = fmt(day.stars, 1);
           var small = document.createElement("small"); small.textContent = "/5";
           dStars.appendChild(small);
-          var dMini = document.createElement("span"); dMini.className = "d-mini"; dMini.textContent = miniStars(day.stars);
+          var dMini = document.createElement("span"); dMini.className = "d-mini"; miniStars(dMini, day.stars);
           dScore.appendChild(dStars); dScore.appendChild(dMini);
           var dVerdict = document.createElement("span"); dVerdict.className = "d-verdict " + day.verdict.kind;
           var dot = document.createElement("span"); dot.className = "dot";
