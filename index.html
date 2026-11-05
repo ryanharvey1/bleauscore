@@ -1,0 +1,1151 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <meta name="color-scheme" content="light dark" />
+    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22%3E%3Ctext y=%22.9em%22 font-size=%2290%22%3E%F0%9F%A7%97%3C/text%3E%3C/svg%3E" />
+    <title>BleauScore · Fontainebleau climbing forecast</title>
+    <meta name="description" content="Live climbing-conditions score for Fontainebleau sandstone: temperature, humidity, recent rain and a hard no-go when the rock is damp." />
+    <meta property="og:title" content="BleauScore — is Font climbable today? · Bleau est-il grimpable ?" />
+    <meta property="og:description" content="Live climbing score for Rocher Canon, Bas Cuvier, Franchard Isatis and Apremont from the Open-Meteo forecast. In English and French." />
+    <meta property="og:type" content="website" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Bitter:ital,wght@0,500;0,700;0,800;1,500&family=Archivo:wght@400;500;600;700;800&family=Archivo+Narrow:wght@500;600;700&display=swap" rel="stylesheet" />
+    <style>
+      :root{
+        color-scheme: light dark;
+        /* Sandstone & slate — warm rock, cool sky. */
+        --bg:#e8edf0;
+        --bg-deep:#dbe4e8;
+        --surface:#ffffff;
+        --surface-2:#f1f5f6;
+        --ink:#162834;
+        --ink-2:#3d5566;
+        --muted:#6e8492;
+        --line:#cfdce1;
+        --line-strong:#afc6ce;
+        --forest:#26536b;
+        --forest-deep:#ffffff;
+        --forest-ink:#162834;
+        --forest-muted:#6e8492;
+        --sand:#c05f1e;
+        --sand-bright:#e07f24;
+        --star:#de8620;
+        --star-track:#dce5e8;
+        --go:#14805e;
+        --go-bg:#d6eee2;
+        --go-ink:#0c5a40;
+        --marg:#8f6200;
+        --marg-bg:#fdf0c2;
+        --marg-ink:#6b4a00;
+        --nogo:#b23a24;
+        --nogo-bg:#fbe3dc;
+        --nogo-ink:#7e2817;
+        --hero-bg:#ffffff;
+        --hero-ink:#162834;
+        --hero-muted:#6e8492;
+        --hero-line:#dde7ea;
+        --hero-fact-bg:#f7f2e9;
+        --hero-ring:rgba(192,95,30,.10);
+        --shadow:0 1px 2px rgba(22,40,52,.06),0 10px 28px -18px rgba(22,40,52,.28);
+        --radius-hero:22px;
+        --radius-card:14px;
+        --radius-row:10px;
+      }
+      @media (prefers-color-scheme: dark){
+        :root{
+          --bg:#111a21;
+          --bg-deep:#0c1318;
+          --surface:#1b2831;
+          --surface-2:#22313c;
+          --ink:#eaf1f4;
+          --ink-2:#c2d2da;
+          --muted:#8aa0ac;
+          --line:#2e424e;
+          --line-strong:#416173;
+          --forest:#33718f;
+          --forest-deep:#1e3442;
+          --forest-ink:#f0f6f8;
+          --forest-muted:#a9c2ce;
+          --sand:#ea9a4b;
+          --sand-bright:#f0a83e;
+          --star:#eba93f;
+          --star-track:#314551;
+          --go:#3ecf95;
+          --go-bg:#173a2e;
+          --go-ink:#8fe8bf;
+          --marg:#e8c15a;
+          --marg-bg:#3a3312;
+          --marg-ink:#f0d189;
+          --nogo:#f08a72;
+          --nogo-bg:#3d211a;
+          --nogo-ink:#f5b3a2;
+          --hero-bg:#1e3442;
+          --hero-ink:#f0f6f8;
+          --hero-muted:#a9c2ce;
+          --hero-line:rgba(255,255,255,.14);
+          --hero-fact-bg:#1e3442;
+          --hero-ring:rgba(255,255,255,.06);
+          --shadow:0 1px 2px rgba(0,0,0,.4),0 12px 30px -18px rgba(0,0,0,.7);
+        }
+      }
+      *{box-sizing:border-box}
+      html{-webkit-text-size-adjust:100%}
+      body{
+        margin:0;
+        background:var(--bg);
+        color:var(--ink);
+        font-family:"Archivo",system-ui,-apple-system,"Segoe UI",sans-serif;
+        font-size:16px;
+        line-height:1.5;
+      }
+      .wrap{max-width:1060px;margin:0 auto;padding:0 18px 56px}
+
+      /* ---------- slim top bar ---------- */
+      .topbar{
+        display:flex;align-items:center;justify-content:space-between;gap:14px;flex-wrap:wrap;
+        padding:16px 0 12px;border-bottom:2px solid var(--ink);
+      }
+      .wordmark{
+        font-family:"Bitter",serif;font-weight:800;font-size:22px;letter-spacing:-.01em;line-height:1;
+      }
+      .wordmark em{font-style:normal;color:var(--sand)}
+      .topbar-meta{display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+      .updated{font-size:12.5px;color:var(--muted);font-weight:500}
+      .updated b{color:var(--ink-2);font-weight:700}
+      .btn{
+        appearance:none;border:1px solid var(--line-strong);background:var(--surface);
+        color:var(--ink);font:inherit;font-size:13.5px;font-weight:700;
+        padding:8px 14px;border-radius:999px;cursor:pointer;display:inline-flex;align-items:center;gap:7px;
+      }
+      .btn:hover{border-color:var(--ink-2)}
+      .btn:focus-visible,.sector-tab:focus-visible,.day-card:focus-visible{outline:3px solid var(--sand);outline-offset:2px}
+      .btn svg{width:14px;height:14px;flex:none}
+      .btn.spinning svg{animation:spin 1s linear infinite}
+      .btn[disabled]{opacity:.55;cursor:wait}
+      @keyframes spin{to{transform:rotate(360deg)}}
+      @media (prefers-reduced-motion: reduce){.btn.spinning svg{animation:none}}
+
+      /* refresh outcome notice */
+      .refresh-note{
+        margin-top:14px;border-radius:var(--radius-row);padding:11px 15px;
+        font-size:14px;font-weight:600;border:1px solid var(--line-strong);background:var(--surface-2);color:var(--ink-2);
+      }
+      .refresh-note b{color:var(--ink);font-weight:800}
+      .refresh-note.err{background:var(--nogo-bg);border-color:var(--nogo);color:var(--nogo-ink)}
+      .refresh-note.err b{color:var(--nogo-ink)}
+      .refresh-note.ok{background:var(--go-bg);border-color:var(--go);color:var(--go-ink)}
+      .refresh-note.ok b{color:var(--go-ink)}
+
+      .lede{margin:14px 0 0;font-size:14.5px;color:var(--ink-2);max-width:62ch}
+      .lede b{color:var(--ink)}
+
+      /* ---------- sector picker ---------- */
+      .picker-label{
+        margin:26px 0 10px;font-size:12px;font-weight:800;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);
+        display:flex;align-items:baseline;gap:10px;flex-wrap:wrap;
+      }
+      .picker-label .coords{letter-spacing:0;text-transform:none;font-weight:600;font-size:12.5px}
+      .sector-tabs{display:flex;flex-wrap:wrap;gap:8px}
+      .sector-tab{
+        appearance:none;cursor:pointer;font:inherit;text-align:left;
+        border:1.5px solid var(--line-strong);background:var(--surface);color:var(--ink);
+        border-radius:12px;padding:10px 16px 9px;min-width:0;
+      }
+      .sector-tab .s-name{display:block;font-weight:800;font-size:15.5px;line-height:1.2}
+      .sector-tab .s-note{display:block;font-size:12px;color:var(--muted);font-weight:500;margin-top:1px}
+      .sector-tab[aria-pressed="true"]{background:var(--forest);border-color:var(--forest);color:#fff}
+      .sector-tab[aria-pressed="true"] .s-note{color:#c3d9e2}
+
+      /* ---------- hero verdict ---------- */
+      .hero{
+        margin-top:18px;background:var(--hero-bg);color:var(--hero-ink);
+        border:1px solid var(--line);border-top:4px solid var(--sand);
+        border-radius:var(--radius-hero);padding:26px 28px 24px;box-shadow:var(--shadow);
+        position:relative;overflow:hidden;
+      }
+      .hero::after{
+        content:"";position:absolute;right:-70px;top:-70px;width:230px;height:230px;border-radius:50%;
+        border:34px solid var(--hero-ring);pointer-events:none;
+      }
+      .hero-top{display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap;align-items:flex-start;position:relative;z-index:1}
+      .hero-day{font-size:13px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--hero-muted)}
+      .hero-day strong{display:block;font-family:"Bitter",serif;font-size:27px;letter-spacing:0;text-transform:none;color:var(--hero-ink);margin-top:3px;line-height:1.15}
+      .verdict-badge{
+        display:inline-flex;align-items:center;gap:9px;font-weight:800;font-size:15px;
+        padding:9px 16px;border-radius:999px;white-space:nowrap;
+      }
+      .verdict-badge .dot{width:10px;height:10px;border-radius:50%;background:currentColor;flex:none}
+      .verdict-badge.go{background:var(--go-bg);color:var(--go-ink)}
+      .verdict-badge.marginal{background:var(--marg-bg);color:var(--marg-ink)}
+      .verdict-badge.nogo{background:var(--nogo-bg);color:var(--nogo-ink)}
+      .hero-score{display:flex;align-items:flex-end;gap:20px;flex-wrap:wrap;margin-top:18px;position:relative;z-index:1}
+      .stars-wrap{line-height:1}
+      .stars{position:relative;display:inline-block;font-size:52px;line-height:1;letter-spacing:4px;font-family:"Archivo",sans-serif}
+      .stars .track{color:var(--star-track)}
+      .stars .fill{position:absolute;left:0;top:0;color:var(--sand-bright);overflow:hidden;white-space:nowrap}
+      .score-num{font-family:"Bitter",serif;font-weight:800;font-size:54px;line-height:.95}
+      .score-num small{font-size:24px;color:var(--hero-muted);font-weight:700}
+      .hero-verdict-text{font-size:17px;font-weight:600;max-width:34ch;line-height:1.4}
+      .hero-facts{
+        display:grid;grid-template-columns:repeat(4,1fr);gap:1px;background:var(--hero-line);
+        border:1px solid var(--hero-line);border-radius:12px;overflow:hidden;margin-top:22px;position:relative;z-index:1;
+      }
+      .hero-fact{background:var(--hero-fact-bg);padding:12px 14px;min-width:0}
+      .hero-fact .k{font-size:11px;font-weight:800;letter-spacing:.11em;text-transform:uppercase;color:var(--hero-muted)}
+      .hero-fact .v{font-size:19px;font-weight:800;margin-top:2px;font-variant-numeric:tabular-nums;white-space:nowrap}
+      .hero-fact .v small{font-size:12.5px;font-weight:600;color:var(--hero-muted)}
+
+      /* ---------- day cards ---------- */
+      .days{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-top:14px}
+      .day-card{
+        appearance:none;cursor:pointer;font:inherit;text-align:left;width:100%;
+        background:var(--surface);border:1.5px solid var(--line);border-radius:var(--radius-card);
+        padding:14px 15px 12px;box-shadow:var(--shadow);color:var(--ink);
+      }
+      .day-card:hover{border-color:var(--line-strong)}
+      .day-card[aria-pressed="true"]{border-color:var(--sand);box-shadow:0 0 0 1.5px var(--sand),var(--shadow)}
+      .day-card .d-name{font-size:12px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;color:var(--muted)}
+      .day-card .d-date{font-family:"Bitter",serif;font-weight:700;font-size:16.5px;margin-top:1px}
+      .day-card .d-score{display:flex;align-items:baseline;gap:7px;margin-top:8px}
+      .day-card .d-stars{font-family:"Bitter",serif;font-weight:800;font-size:27px;line-height:1}
+      .day-card .d-stars small{font-size:14px;color:var(--muted);font-weight:700}
+      .day-card .d-mini{font-size:11px;color:var(--star);letter-spacing:1px;line-height:1}
+      .day-card .d-verdict{display:inline-flex;align-items:center;gap:6px;margin-top:9px;font-size:11.5px;font-weight:800;letter-spacing:.05em;padding:4px 9px;border-radius:999px}
+      .day-card .d-verdict .dot{width:7px;height:7px;border-radius:50%;background:currentColor}
+      .d-verdict.go{background:var(--go-bg);color:var(--go-ink)}
+      .d-verdict.marginal{background:var(--marg-bg);color:var(--marg-ink)}
+      .d-verdict.nogo{background:var(--nogo-bg);color:var(--nogo-ink)}
+      .day-card .d-window{margin-top:9px;font-size:12.5px;color:var(--muted);font-weight:600;font-variant-numeric:tabular-nums}
+
+      /* ---------- detail panels ---------- */
+      .grid-2{display:grid;grid-template-columns:1.15fr .85fr;gap:14px;margin-top:14px;align-items:start}
+      .panel{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius-card);box-shadow:var(--shadow);padding:20px 20px 16px}
+      .panel h2{font-family:"Bitter",serif;font-size:19px;font-weight:800;margin:0 0 4px;line-height:1.25}
+      .panel .sub{font-size:13px;color:var(--muted);margin:0 0 14px}
+      .stat-grid{display:grid;grid-template-columns:1fr 1fr;gap:0}
+      .stat{padding:11px 12px 11px 0;border-top:1px solid var(--line)}
+      .stat .k{font-size:11px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;color:var(--muted)}
+      .stat .v{font-size:21px;font-weight:800;margin-top:2px;font-variant-numeric:tabular-nums;line-height:1.2}
+      .stat .v small{font-size:13px;font-weight:600;color:var(--muted)}
+      .stat .note{font-size:12.5px;color:var(--ink-2);margin-top:2px}
+      .peak-line{
+        margin-top:12px;background:var(--surface-2);border:1px solid var(--line);border-radius:var(--radius-row);
+        padding:11px 13px;font-size:13.5px;color:var(--ink-2);
+      }
+      .peak-line b{color:var(--ink)}
+
+      /* component bars */
+      .comp{margin-top:6px}
+      .comp-row{display:grid;grid-template-columns:118px 1fr 52px;gap:10px;align-items:center;padding:7px 0;border-top:1px solid var(--line)}
+      .comp-row:first-child{border-top:none}
+      .comp-name{font-size:13.5px;font-weight:700}
+      .comp-name span{display:block;font-size:11.5px;font-weight:500;color:var(--muted)}
+      .comp-bar{height:9px;border-radius:99px;background:var(--star-track);overflow:hidden}
+      .comp-bar i{display:block;height:100%;background:var(--sand);border-radius:99px}
+      .comp-val{font-size:13px;font-weight:800;text-align:right;font-variant-numeric:tabular-nums}
+
+      /* ---------- hourly ---------- */
+      .hourly-panel{margin-top:14px}
+      .hour-head,.hour-row{
+        display:grid;grid-template-columns:52px 74px 1fr;gap:10px;align-items:center;
+      }
+      .hour-head{
+        font-size:11px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);
+        padding:0 12px 8px;
+      }
+      .hour-head .h-metrics{text-align:right}
+      .hour-row{
+        background:var(--surface-2);border:1px solid var(--line);border-radius:var(--radius-row);
+        padding:9px 12px;margin-top:6px;
+      }
+      .hour-row.is-best{border-color:var(--sand);box-shadow:0 0 0 1px var(--sand)}
+      .hour-row.is-damp{border-color:var(--nogo);background:var(--nogo-bg)}
+      .h-time{font-weight:800;font-size:15px;font-variant-numeric:tabular-nums}
+      .h-time .best-tag{display:block;font-size:10px;font-weight:800;letter-spacing:.08em;color:var(--sand);text-transform:uppercase}
+      .h-score{display:flex;align-items:center;gap:8px;min-width:0}
+      .h-bar{flex:1;height:8px;border-radius:99px;background:var(--star-track);overflow:hidden;min-width:34px}
+      .h-bar i{display:block;height:100%;border-radius:99px}
+      .h-bar i.go{background:var(--go)} .h-bar i.marginal{background:var(--sand)} .h-bar i.nogo{background:var(--nogo)}
+      .h-num{font-weight:800;font-size:14.5px;font-variant-numeric:tabular-nums;white-space:nowrap}
+      .h-metrics{font-size:12.5px;color:var(--ink-2);text-align:right;font-variant-numeric:tabular-nums;line-height:1.45}
+      .h-metrics b{color:var(--ink)}
+      .damp-badge{
+        display:inline-block;font-size:10px;font-weight:800;letter-spacing:.09em;color:var(--nogo-ink);
+        background:var(--surface);border:1px solid var(--nogo);border-radius:5px;padding:1px 5px;margin-left:6px;vertical-align:1px;
+      }
+      @media (prefers-color-scheme: dark){.damp-badge{background:transparent}}
+
+      /* ---------- how it works / footer ---------- */
+      .how{margin-top:26px;border-top:2px solid var(--ink);padding-top:18px}
+      .how h2{font-family:"Bitter",serif;font-size:20px;font-weight:800;margin:0 0 8px}
+      .how-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px 34px;font-size:14px;color:var(--ink-2)}
+      .how-grid p{margin:6px 0}
+      .how-grid b{color:var(--ink)}
+      .rule-box{
+        margin-top:12px;background:var(--nogo-bg);color:var(--nogo-ink);border-radius:var(--radius-row);
+        padding:12px 15px;font-size:14px;font-weight:600;
+      }
+      .rule-box b{font-weight:800}
+      footer{margin-top:26px;padding-top:14px;border-top:1px solid var(--line);font-size:12.5px;color:var(--muted);display:flex;gap:8px 20px;flex-wrap:wrap}
+      footer a{color:var(--ink-2);font-weight:600}
+
+      /* ---------- states ---------- */
+      .state{
+        margin-top:18px;background:var(--surface);border:1.5px dashed var(--line-strong);border-radius:var(--radius-card);
+        padding:34px 22px;text-align:center;
+      }
+      .state h2{font-family:"Bitter",serif;margin:0 0 6px;font-size:20px}
+      .state p{margin:0 auto 16px;color:var(--muted);max-width:46ch;font-size:14.5px}
+      .spinner{
+        width:30px;height:30px;margin:0 auto 14px;border-radius:50%;
+        border:3.5px solid var(--line);border-top-color:var(--sand);animation:spin 0.9s linear infinite;
+      }
+      @media (prefers-reduced-motion: reduce){.spinner{animation:none}}
+      [hidden]{display:none !important}
+
+      /* ---------- responsive ---------- */
+      @media (max-width:820px){
+        .grid-2{grid-template-columns:1fr}
+        .how-grid{grid-template-columns:1fr}
+        .hero-facts{grid-template-columns:1fr 1fr}
+      }
+      @media (max-width:560px){
+        .wrap{padding:0 13px 44px}
+        .hero{padding:20px 18px 18px}
+        .stars{font-size:40px}
+        .score-num{font-size:44px}
+        .days{grid-template-columns:1fr 1fr}
+        .sector-tab{flex:1 1 calc(50% - 8px)}
+        .hour-head{display:none}
+        .hour-row{grid-template-columns:46px 64px 1fr;gap:8px;padding:9px 10px}
+        .h-metrics{font-size:11.5px}
+        .comp-row{grid-template-columns:100px 1fr 46px;gap:8px}
+      }
+      /* language switch */
+      .lang-toggle{display:inline-flex;border:1px solid var(--line-strong);border-radius:999px;overflow:hidden;background:var(--surface)}
+      .lang-toggle button{appearance:none;border:0;background:transparent;color:var(--muted);font:inherit;font-size:12.5px;font-weight:800;letter-spacing:.06em;padding:8px 11px;cursor:pointer}
+      .lang-toggle button[aria-pressed="true"]{background:var(--ink);color:var(--surface)}
+      .lang-toggle button:focus-visible{outline:3px solid var(--sand);outline-offset:-3px}
+      .score-label{font-size:11px;font-weight:800;letter-spacing:.14em;text-transform:uppercase;color:var(--hero-muted);margin-bottom:6px}
+    </style>
+  </head>
+  <body>
+    <div class="wrap">
+      <header class="topbar">
+        <div class="wordmark">Bleau<em>Score</em></div>
+        <div class="topbar-meta">
+          <span class="updated" id="updatedAt" data-i18n="updatedDefault">BleauScore · Fontainebleau sandstone</span>
+          <div class="lang-toggle" role="group" data-i18n-aria="langAria" aria-label="Language">
+            <button type="button" data-lang="en" lang="en" aria-pressed="true">EN</button>
+            <button type="button" data-lang="fr" lang="fr" aria-pressed="false">FR</button>
+          </div>
+          <button class="btn" id="refreshBtn" type="button">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12a9 9 0 1 1-2.64-6.36"/><path d="M21 3v6h-6"/></svg>
+            <span data-i18n="refresh">Refresh</span>
+          </button>
+        </div>
+      </header>
+
+      <div class="refresh-note" id="refreshNote" role="status" hidden></div>
+
+      <p class="lede" data-i18n-html="lede"></p>
+
+      <div class="picker-label"><span data-i18n="sector">Sector</span> <span class="coords" id="sectorCoords"></span></div>
+      <div class="sector-tabs" id="sectorTabs" role="group" data-i18n-aria="sectorsAria"></div>
+
+      <div class="state" id="loadingState">
+        <div class="spinner" aria-hidden="true"></div>
+        <h2 data-i18n="loadingTitle"></h2>
+        <p data-i18n="loadingText"></p>
+      </div>
+
+      <div class="state" id="errorState" hidden>
+        <h2 data-i18n="errorTitle"></h2>
+        <p id="errorMsg"></p>
+        <button class="btn" id="retryBtn" type="button" data-i18n="retry"></button>
+      </div>
+
+      <main id="content" hidden>
+        <section class="hero" aria-live="polite">
+          <div class="hero-top">
+            <div class="hero-day"><span id="heroDayLabel"></span><strong id="heroSector"></strong></div>
+            <span class="verdict-badge go" id="heroBadge"><span class="dot"></span><span id="heroBadgeText"></span></span>
+          </div>
+          <div class="hero-score">
+            <div class="stars-wrap">
+              <div class="score-label">BleauScore</div>
+              <div class="stars" aria-hidden="true"><span class="track">★★★★★</span><span class="fill" id="starFill">★★★★★</span></div>
+            </div>
+            <div class="score-num"><span id="heroStars">–</span><small>/5</small></div>
+            <p class="hero-verdict-text" id="heroVerdict">—</p>
+          </div>
+          <div class="hero-facts">
+            <div class="hero-fact"><div class="k" data-i18n="factWindow"></div><div class="v" id="factWindow">—</div></div>
+            <div class="hero-fact"><div class="k" data-i18n="factRh"></div><div class="v" id="factRh">—</div></div>
+            <div class="hero-fact"><div class="k" data-i18n="factRain24"></div><div class="v" id="factRain24">—</div></div>
+            <div class="hero-fact"><div class="k" data-i18n="factRain48"></div><div class="v" id="factRain48">—</div></div>
+          </div>
+        </section>
+
+        <div class="days" id="dayCards" role="group" data-i18n-aria="daysAria"></div>
+
+        <div class="grid-2">
+          <section class="panel" data-i18n-aria="detailAria">
+            <h2 id="detailTitle"></h2>
+            <p class="sub" data-i18n="detailSub"></p>
+            <div class="stat-grid">
+              <div class="stat"><div class="k" data-i18n="statWindowK"></div><div class="v" id="statWindow">—</div><div class="note" id="statWindowNote"></div></div>
+              <div class="stat"><div class="k" data-i18n="statRhK"></div><div class="v" id="statRh">—</div><div class="note" data-i18n="statRhNote"></div></div>
+              <div class="stat"><div class="k" data-i18n="statRain24K"></div><div class="v" id="statRain24">—</div><div class="note" id="statRain24Note"></div></div>
+              <div class="stat"><div class="k" data-i18n="statRain48K"></div><div class="v" id="statRain48">—</div><div class="note" data-i18n="statRain48Note"></div></div>
+              <div class="stat"><div class="k" data-i18n="statDampK"></div><div class="v" id="statDamp">—</div><div class="note" data-i18n="statDampNote"></div></div>
+              <div class="stat"><div class="k" data-i18n="statPeakK"></div><div class="v" id="statPeak">—</div><div class="note" id="statPeakNote"></div></div>
+            </div>
+            <div class="peak-line" id="peakLine"></div>
+          </section>
+
+          <section class="panel" data-i18n-aria="breakdownAria">
+            <h2 data-i18n="driveTitle"></h2>
+            <p class="sub" data-i18n="driveSub"></p>
+            <div class="comp" id="compBars"></div>
+          </section>
+        </div>
+
+        <section class="panel hourly-panel" data-i18n-aria="hourlyAria">
+          <h2 data-i18n="hourlyTitle"></h2>
+          <p class="sub" data-i18n="hourlySub"></p>
+          <div class="hour-head"><span data-i18n="hhTime"></span><span data-i18n="hhScore"></span><span class="h-metrics" data-i18n="hhMetrics"></span></div>
+          <div id="hourRows"></div>
+        </section>
+      </main>
+
+      <section class="how">
+        <h2 data-i18n="howTitle"></h2>
+        <div class="how-grid">
+          <p data-i18n-html="how1"></p>
+          <p data-i18n-html="how2"></p>
+          <p data-i18n-html="how3"></p>
+          <p data-i18n-html="how4"></p>
+        </div>
+        <div class="rule-box" data-i18n-html="rule"></div>
+      </section>
+
+      <footer>
+        <span data-i18n-html="foot1"></span>
+        <span data-i18n="foot2"></span>
+        <span data-i18n="foot3"></span>
+        <span data-i18n-html="foot4"></span>
+      </footer>
+    </div>
+    <script>
+      "use strict";
+
+      /* ============================================================
+         Translations. {name} placeholders are filled by t().
+         Strings used with data-i18n-html are our own, trusted markup.
+         ============================================================ */
+      var NB = " "; // non-breaking space for French typography
+      var STR = {
+        en: {
+          locale: "en-GB",
+          title: "BleauScore · Fontainebleau climbing forecast",
+          langAria: "Language",
+          refresh: "Refresh",
+          updatedDefault: "BleauScore · Fontainebleau sandstone",
+          lede: "A ClimbItScore-style rating for Font, calibrated for sandstone: <b>prime friction at 5–12&nbsp;°C</b>, humidity and recent rain weighted hard, and a hard stop when the rock is likely damp — <b>wet sandstone is weak sandstone, and climbing it damages the holds.</b> Scores are computed live from the Open-Meteo forecast every time you open the page.",
+          sector: "Sector",
+          sectorsAria: "Choose a sector",
+          loadingTitle: "Reading the sky over the forest…",
+          loadingText: "Fetching the live Open-Meteo forecast and scoring it hour by hour.",
+          errorTitle: "Couldn’t load the forecast",
+          errorWith: "The live weather request failed ({e}). Check your connection and try again.",
+          retry: "Try again",
+          factWindow: "Best window",
+          factRh: "Window humidity",
+          factRain24: "Rain · 24 h",
+          factRain48: "Rain · 48 h",
+          daysAria: "Choose a day",
+          detailAria: "Day detail",
+          breakdownAria: "Score breakdown",
+          hourlyAria: "Hour by hour",
+          detailSub: "Scored on the best contiguous 3-hour window between 09:00 and 17:00 — a damp morning doesn’t sink an afternoon that dries out.",
+          statWindowK: "Best 3-hour window",
+          statRhK: "Best-window avg RH",
+          statRhNote: "≥ 90% caps the day at 3.0 — rock dries too slowly",
+          statRain24K: "Rain last 24 h",
+          statRain48K: "Rain last 48 h",
+          statRain48Note: "Font sandstone holds moisture well past the rain itself",
+          statDampK: "Damp hours in window",
+          statDampNote: "Any damp hour in the best window = no-go",
+          statPeakK: "Peak hour",
+          driveTitle: "What’s driving the score",
+          driveSub: "Average component scores across the best window, weighted as BleauScore weights them.",
+          hourlyTitle: "Hour by hour · 09:00–17:00",
+          hourlySub: "Each hour scored on its own. Judge it by touch on arrival — the score is a forecast, not a promise.",
+          hhTime: "Time", hhScore: "Score", hhMetrics: "Temp · RH · Dew · Wind · Cloud · Rain",
+          howTitle: "How BleauScore works",
+          how1: "<b>Temperature · 35%</b> — full marks between 5 °C and 12 °C, Font’s prime friction band. Falls away to zero below −2 °C and above 25 °C.",
+          how2: "<b>Humidity · 25%</b> — full marks at 50% RH or under, sliding to zero at 100%. If the dew point sits within 2 °C of the air temperature, the score is cut further: that’s condensation and fog on the rock.",
+          how3: "<b>Dryness · 25%</b> — driven by rain in the last 12 and 24 hours. More than 0.5&nbsp;mm in the last 12 hours zeroes this component outright.",
+          how4: "<b>Sun · 10% &amp; wind · 5%</b> — clear sky (under 30% cloud) helps the rock dry; a light 5–20&nbsp;km/h breeze helps too. Strong wind over 30&nbsp;km/h costs points.",
+          rule: "<b>The hard rule:</b> rain over 0.5&nbsp;mm in the last 12 hours, or humidity at 95%+ with the dew point at the air temperature, flags an hour <b>DAMP</b>. Any damp hour inside the day’s best window makes the whole day a no-go — don’t climb wet sandstone.",
+          foot1: "Weather: <a href=\"https://open-meteo.com\" target=\"_blank\" rel=\"noopener\">Open-Meteo</a> (free, no key) — the same source ClimbItScore uses.",
+          foot2: "Sector coordinates follow bleau.info.",
+          foot3: "BleauScore v1 · same recipe, same numbers, wherever you run it.",
+          foot4: "Live forecast on every visit; refreshes itself if the tab sits open for more than 30 minutes. Link to a sector directly, e.g. <code>#apremont</code>; add <code>?lang=fr</code> for French.",
+          today: "Today", tomorrow: "Tomorrow",
+          "short.go": "GO", "short.marginal": "MARGINAL", "short.nogo": "NO-GO",
+          dampCard: "NO-GO · DAMP", dampHero: "NO-GO · DAMP ROCK",
+          "verdict.damp": "NO-GO — rock likely damp, do not climb sandstone",
+          "verdict.go": "GO — good conditions",
+          "verdict.marginal": "MARGINAL — climbable, pick sunny sectors, easy circuits",
+          "verdict.poor": "NO-GO — poor conditions",
+          fetched: "Forecast fetched ", parisTime: "{t} · Paris time",
+          fetchedFailed: " · latest refresh failed — showing this fetch",
+          cardBest: "Best {w} · RH {rh}%",
+          pctAvg: "% avg",
+          detailTitle: "{d} — the detail",
+          windowNote: "Peak hour {t} at {s}/5",
+          rainNone: "Bone dry for a full day — the best starting point there is",
+          rainTrace: "A trace — surface damp possible early, should clear",
+          rainSoak: "Enough to soak the sandstone; allow serious drying time",
+          peakNote: "{s}/5 in that single hour",
+          peakLabel: "At the peak ({t}): ",
+          peakLine: "{temp} °C, RH {rh}%, dew point {dew} °C, wind {wind} km/h, cloud {cloud}%.",
+          "comp.temp": "Temperature", "comp.humidity": "Humidity", "comp.dryness": "Dryness", "comp.sun": "Sun", "comp.wind": "Wind",
+          ofScore: "{p}% of score",
+          bestTag: "Best window",
+          hourLine1: " · RH {rh}% · dew {dew}°",
+          hourLine2: "wind {w} · cloud {c}% · rain {r} mm",
+          dampBadge: "DAMP",
+          noteRefreshingB: "Refreshing… ", noteRefreshing: "pulling the live Open-Meteo forecast.",
+          noteUpdatedB: "Live forecast updated · {t} Paris time. ", noteUpdated: "You’re seeing the latest numbers.",
+          noteFailedB: "Refresh didn’t go through. ",
+          noteFailedHave: "Still showing the forecast from {t} Paris time — check your connection and tap Refresh again.",
+          noteFailedNone: "No forecast could be loaded — check your connection and tap Refresh again.",
+          "err.timeout": "the request timed out",
+          "err.http": "Open-Meteo returned {s}",
+          "err.coverage": "the forecast didn’t cover the next four days",
+          "err.network": "network error",
+          "note.canon": "via Bois-le-Roi · GR1 walk-in",
+          "note.cuvier": "the classic first sector",
+          "note.isatis": "Franchard · busy, big circuits",
+          "note.apremont": "Gorges d’Apremont · Barbizon side"
+        },
+        fr: {
+          locale: "fr-FR",
+          title: "BleauScore · Météo grimpe à Fontainebleau",
+          langAria: "Langue",
+          refresh: "Actualiser",
+          updatedDefault: "BleauScore · grès de Fontainebleau",
+          lede: "Une note à la ClimbItScore pour Bleau, calibrée pour le grès : <b>adhérence idéale entre 5 et 12" + NB + "°C</b>, humidité et pluie récente fortement pondérées, et un arrêt net quand le rocher est probablement humide — <b>le grès mouillé est fragile, et le grimper abîme les prises.</b> Les notes sont calculées en direct à partir des prévisions Open-Meteo à chaque ouverture de la page.",
+          sector: "Secteur",
+          sectorsAria: "Choisir un secteur",
+          loadingTitle: "On lit le ciel au-dessus de la forêt…",
+          loadingText: "Récupération des prévisions Open-Meteo en direct et notation heure par heure.",
+          errorTitle: "Impossible de charger les prévisions",
+          errorWith: "La requête météo a échoué (" + "{e}). Vérifiez votre connexion et réessayez.",
+          retry: "Réessayer",
+          factWindow: "Meilleur créneau",
+          factRh: "Humidité du créneau",
+          factRain24: "Pluie · 24 h",
+          factRain48: "Pluie · 48 h",
+          daysAria: "Choisir un jour",
+          detailAria: "Détail du jour",
+          breakdownAria: "Détail de la note",
+          hourlyAria: "Heure par heure",
+          detailSub: "Note calculée sur le meilleur créneau de 3 heures consécutives entre 9" + NB + "h et 17" + NB + "h — une matinée humide ne condamne pas un après-midi qui sèche.",
+          statWindowK: "Meilleur créneau de 3" + NB + "h",
+          statRhK: "HR moyenne du créneau",
+          statRhNote: "≥ 90" + NB + "% plafonne la journée à 3,0 — le rocher sèche trop lentement",
+          statRain24K: "Pluie sur 24" + NB + "h",
+          statRain48K: "Pluie sur 48" + NB + "h",
+          statRain48Note: "Le grès de Bleau garde l’humidité bien après la pluie",
+          statDampK: "Heures humides dans le créneau",
+          statDampNote: "Une seule heure humide dans le créneau = à éviter",
+          statPeakK: "Meilleure heure",
+          driveTitle: "Ce qui fait la note",
+          driveSub: "Note moyenne de chaque critère sur le meilleur créneau, pondérée comme dans le BleauScore.",
+          hourlyTitle: "Heure par heure · 9" + NB + "h–17" + NB + "h",
+          hourlySub: "Chaque heure est notée séparément. Jugez au toucher en arrivant — la note est une prévision, pas une promesse.",
+          hhTime: "Heure", hhScore: "Note", hhMetrics: "Temp · HR · Rosée · Vent · Nuages · Pluie",
+          howTitle: "Comment fonctionne le BleauScore",
+          how1: "<b>Température · 35" + NB + "%</b> — note maximale entre 5" + NB + "°C et 12" + NB + "°C, la plage d’adhérence idéale à Bleau. Elle tombe à zéro sous −2" + NB + "°C et au-dessus de 25" + NB + "°C.",
+          how2: "<b>Humidité · 25" + NB + "%</b> — note maximale à 50" + NB + "% d’HR ou moins, jusqu’à zéro à 100" + NB + "%. Si le point de rosée est à moins de 2" + NB + "°C de la température de l’air, la note baisse encore : c’est la condensation et le brouillard sur le rocher.",
+          how3: "<b>Sécheresse · 25" + NB + "%</b> — dépend de la pluie des 12 et 24 dernières heures. Plus de 0,5" + NB + "mm sur les 12 dernières heures met ce critère à zéro.",
+          how4: "<b>Soleil · 10" + NB + "% et vent · 5" + NB + "%</b> — un ciel dégagé (moins de 30" + NB + "% de nuages) aide le rocher à sécher, une brise légère de 5 à 20" + NB + "km/h aussi. Un vent fort au-delà de 30" + NB + "km/h coûte des points.",
+          rule: "<b>La règle absolue :</b> plus de 0,5" + NB + "mm de pluie sur les 12 dernières heures, ou une humidité de 95" + NB + "% et plus avec le point de rosée à la température de l’air, classe une heure <b>HUMIDE</b>. Une seule heure humide dans le meilleur créneau rend toute la journée à éviter — on ne grimpe pas sur du grès mouillé.",
+          foot1: "Météo : <a href=\"https://open-meteo.com\" target=\"_blank\" rel=\"noopener\">Open-Meteo</a> (gratuit, sans clé) — la même source que ClimbItScore.",
+          foot2: "Coordonnées des secteurs d’après bleau.info.",
+          foot3: "BleauScore v1 · même recette, mêmes chiffres, où que vous l’utilisiez.",
+          foot4: "Prévisions en direct à chaque visite ; actualisation automatique si l’onglet reste ouvert plus de 30 minutes. Lien direct vers un secteur, par ex. <code>#apremont</code> ; ajoutez <code>?lang=en</code> pour l’anglais.",
+          today: "Aujourd’hui", tomorrow: "Demain",
+          "short.go": "FAVORABLE", "short.marginal": "MOYEN", "short.nogo": "À ÉVITER",
+          dampCard: "ROCHER HUMIDE", dampHero: "À ÉVITER · ROCHER HUMIDE",
+          "verdict.damp": "À ÉVITER — rocher probablement humide, ne grimpez pas sur le grès",
+          "verdict.go": "FAVORABLE — bonnes conditions",
+          "verdict.marginal": "MOYEN — grimpable, choisissez des secteurs ensoleillés et des circuits faciles",
+          "verdict.poor": "À ÉVITER — mauvaises conditions",
+          fetched: "Prévisions récupérées à ", parisTime: "{t} · heure de Paris",
+          fetchedFailed: " · dernière actualisation échouée — ces données sont conservées",
+          cardBest: "Créneau {w} · HR {rh}" + NB + "%",
+          pctAvg: NB + "% moy.",
+          detailTitle: "{d} — le détail",
+          windowNote: "Meilleure heure : {t}, {s}/5",
+          rainNone: "Sec depuis 24 heures — le meilleur point de départ possible",
+          rainTrace: "Quelques traces — surface humide possible tôt, devrait sécher",
+          rainSoak: "Assez pour détremper le grès ; prévoyez un long séchage",
+          peakNote: "{s}/5 sur cette seule heure",
+          peakLabel: "À la meilleure heure ({t}) : ",
+          peakLine: "{temp}" + NB + "°C, HR {rh}" + NB + "%, point de rosée {dew}" + NB + "°C, vent {wind}" + NB + "km/h, nuages {cloud}" + NB + "%.",
+          "comp.temp": "Température", "comp.humidity": "Humidité", "comp.dryness": "Sécheresse", "comp.sun": "Soleil", "comp.wind": "Vent",
+          ofScore: "{p}" + NB + "% de la note",
+          bestTag: "Meilleur créneau",
+          hourLine1: " · HR {rh}" + NB + "% · rosée {dew}°",
+          hourLine2: "vent {w} · nuages {c}" + NB + "% · pluie {r}" + NB + "mm",
+          dampBadge: "HUMIDE",
+          noteRefreshingB: "Actualisation… ", noteRefreshing: "récupération des prévisions Open-Meteo en direct.",
+          noteUpdatedB: "Prévisions mises à jour · {t}, heure de Paris. ", noteUpdated: "Vous voyez les derniers chiffres.",
+          noteFailedB: "L’actualisation a échoué. ",
+          noteFailedHave: "Affichage des prévisions de {t} (heure de Paris) — vérifiez votre connexion et appuyez de nouveau sur Actualiser.",
+          noteFailedNone: "Aucune prévision n’a pu être chargée — vérifiez votre connexion et appuyez de nouveau sur Actualiser.",
+          "err.timeout": "délai dépassé",
+          "err.http": "Open-Meteo a répondu {s}",
+          "err.coverage": "les prévisions ne couvrent pas les quatre prochains jours",
+          "err.network": "erreur réseau",
+          "note.canon": "par Bois-le-Roi · accès par le GR1",
+          "note.cuvier": "le secteur classique pour débuter",
+          "note.isatis": "Franchard · fréquenté, grands circuits",
+          "note.apremont": "Gorges d’Apremont · côté Barbizon"
+        }
+      };
+
+      function pickLang() {
+        var q = null;
+        try { q = new URLSearchParams(location.search).get("lang"); } catch (e) {}
+        if (q && STR[q.toLowerCase()]) return q.toLowerCase();
+        try { var s = localStorage.getItem("bleauscore.lang"); if (s && STR[s]) return s; } catch (e) {}
+        var nav = (navigator.languages && navigator.languages[0]) || navigator.language || "en";
+        return /^fr\b/i.test(nav) ? "fr" : "en";
+      }
+      var lang = pickLang();
+      function t(key, vars) {
+        var s = STR[lang][key];
+        if (s === undefined) s = STR.en[key];
+        if (s === undefined) return key;
+        if (vars) s = s.replace(/\{(\w+)\}/g, function (m, k) { return vars[k] !== undefined ? vars[k] : m; });
+        return s;
+      }
+      function loc() { return STR[lang].locale; }
+      function cap(s) { return s ? s.charAt(0).toUpperCase() + s.slice(1) : s; }
+
+      /* ============================================================
+         BleauScore v1 — faithful port of font_score.py
+         Same components, weights, caps and verdicts.
+         ============================================================ */
+
+      var SECTORS = [
+        { id: "canon",   name: "Rocher Canon",     lat: 48.4616, lon: 2.6598 },
+        { id: "cuvier",  name: "Bas Cuvier",       lat: 48.4417, lon: 2.6375 },
+        { id: "isatis",  name: "Franchard Isatis", lat: 48.4086, lon: 2.6039 },
+        { id: "apremont", name: "Apremont",        lat: 48.4366, lon: 2.6248 }
+      ];
+
+      function tempScore(t) {
+        if (t >= 5 && t <= 12) return 1.0;
+        if (t < 5) return Math.max(0.0, (t - (-2)) / 7.0);
+        return Math.max(0.0, (25 - t) / 13.0);
+      }
+      function humidityScore(rh, dew, t) {
+        var s = rh <= 50 ? 1.0 : Math.max(0.0, 1.0 - (rh - 50) / 50.0);
+        if (dew !== null && dew !== undefined && t - dew <= 2.0) s *= 0.6;
+        return s;
+      }
+      function drynessScore(rain24, rain12) {
+        if (rain12 > 0.5) return 0.0;
+        if (rain24 <= 0) return 1.0;
+        if (rain24 <= 1) return 0.6;
+        if (rain24 <= 3) return 0.3;
+        return 0.1;
+      }
+      function windScore(w) {
+        if (w >= 5 && w <= 20) return 1.0;
+        if (w < 5) return 0.6;
+        if (w <= 30) return 0.7;
+        return 0.3;
+      }
+      function sunScore(cloud) {
+        if (cloud <= 30) return 1.0;
+        if (cloud <= 70) return 0.7;
+        return 0.4;
+      }
+      function components(h) {
+        return {
+          temp: tempScore(h.temp),
+          humidity: humidityScore(h.rh, h.dew, h.temp),
+          dryness: drynessScore(h.rain24, h.rain12),
+          wind: windScore(h.wind),
+          sun: sunScore(h.cloud)
+        };
+      }
+      function hourScore(h) {
+        var c = components(h);
+        return 0.35 * c.temp + 0.25 * c.humidity + 0.25 * c.dryness + 0.05 * c.wind + 0.10 * c.sun;
+      }
+      // Language-neutral verdict; text is looked up at render time.
+      function verdictFor(stars, damp) {
+        if (damp) return { kind: "nogo", key: "damp" };
+        if (stars >= 3.5) return { kind: "go", key: "go" };
+        if (stars >= 2.5) return { kind: "marginal", key: "marginal" };
+        return { kind: "nogo", key: "poor" };
+      }
+      function round1(x) { return Math.round(x * 10) / 10; }
+
+      function buildRows(data) {
+        var hr = data.hourly;
+        var rows = [];
+        for (var i = 0; i < hr.time.length; i++) {
+          rows.push({
+            dateStr: hr.time[i].slice(0, 10),
+            timeStr: hr.time[i].slice(11, 16),
+            hour: parseInt(hr.time[i].slice(11, 13), 10),
+            temp: hr.temperature_2m[i],
+            rh: hr.relative_humidity_2m[i],
+            dew: hr.dew_point_2m[i],
+            precip: hr.precipitation[i] || 0,
+            cloud: hr.cloud_cover[i],
+            wind: hr.wind_speed_10m[i]
+          });
+        }
+        for (var j = 0; j < rows.length; j++) {
+          var s12 = 0, s24 = 0, s48 = 0, k;
+          for (k = Math.max(0, j - 11); k <= j; k++) s12 += rows[k].precip;
+          for (k = Math.max(0, j - 23); k <= j; k++) s24 += rows[k].precip;
+          for (k = Math.max(0, j - 47); k <= j; k++) s48 += rows[k].precip;
+          rows[j].rain12 = s12; rows[j].rain24 = s24; rows[j].rain48 = s48;
+          rows[j].score = hourScore(rows[j]);
+          rows[j].damp = rows[j].rain12 > 0.5 || (rows[j].rh >= 95 && rows[j].dew >= rows[j].temp - 0.5);
+        }
+        return rows;
+      }
+
+      function scoreDay(rows, dateStr) {
+        var dayRows = rows.filter(function (r) { return r.dateStr === dateStr; });
+        var climb = dayRows.filter(function (r) { return r.hour >= 9 && r.hour <= 17; });
+        if (!climb.length) return null;
+        var bestWindow = null, bestAvg = -1;
+        for (var i = 0; i + 3 <= climb.length; i++) {
+          var w = climb.slice(i, i + 3);
+          var avg = (w[0].score + w[1].score + w[2].score) / 3;
+          if (avg > bestAvg) { bestAvg = avg; bestWindow = w; }
+        }
+        if (!bestWindow) { bestWindow = climb.slice(0, Math.min(3, climb.length)); bestAvg = bestWindow.reduce(function (a, h) { return a + h.score; }, 0) / bestWindow.length; }
+        var stars = round1(bestAvg * 5);
+        var bestRh = bestWindow.reduce(function (a, h) { return a + h.rh; }, 0) / bestWindow.length;
+        if (bestRh >= 90) stars = Math.min(stars, 3.0);
+        var best = climb[0];
+        climb.forEach(function (h) { if (h.score > best.score) best = h; });
+        var dampHours = bestWindow.filter(function (h) { return h.damp; }).length;
+        var last = climb[climb.length - 1];
+        var v = verdictFor(stars, dampHours > 0);
+        var compAvg = { temp: 0, humidity: 0, dryness: 0, wind: 0, sun: 0 };
+        bestWindow.forEach(function (h) {
+          var c = components(h);
+          compAvg.temp += c.temp; compAvg.humidity += c.humidity; compAvg.dryness += c.dryness; compAvg.wind += c.wind; compAvg.sun += c.sun;
+        });
+        Object.keys(compAvg).forEach(function (k) { compAvg[k] /= bestWindow.length; });
+        return {
+          dateStr: dateStr, climb: climb, bestWindow: bestWindow, best: best,
+          stars: stars, bestRh: bestRh, dampHours: dampHours,
+          rain24: last.rain24, rain48: last.rain48,
+          verdict: v, compAvg: compAvg
+        };
+      }
+
+      /* ---------- dates & numbers ---------- */
+      function parisTodayStr() {
+        return new Intl.DateTimeFormat("en-CA", { timeZone: "Europe/Paris", year: "numeric", month: "2-digit", day: "2-digit" }).format(new Date());
+      }
+      function addDays(dateStr, n) {
+        var p = dateStr.split("-");
+        var d = new Date(Date.UTC(+p[0], +p[1] - 1, +p[2] + n));
+        return d.toISOString().slice(0, 10);
+      }
+      function dayLabel(dateStr, idx) {
+        var d = new Date(dateStr + "T12:00:00Z");
+        var weekday = new Intl.DateTimeFormat(loc(), { timeZone: "Europe/Paris", weekday: "long" }).format(d);
+        var nice = new Intl.DateTimeFormat(loc(), { timeZone: "Europe/Paris", day: "numeric", month: "long" }).format(d);
+        if (idx === 0) return { name: t("today"), full: t("today") + " · " + weekday + " " + nice };
+        if (idx === 1) return { name: t("tomorrow"), full: cap(weekday) + " " + nice };
+        return { name: weekday, full: cap(weekday) + " " + nice };
+      }
+      function shortDate(dateStr) {
+        return new Intl.DateTimeFormat(loc(), { timeZone: "Europe/Paris", day: "numeric", month: "short" }).format(new Date(dateStr + "T12:00:00Z"));
+      }
+      function parisTimeStr(d) {
+        return new Intl.DateTimeFormat("en-GB", { timeZone: "Europe/Paris", hour: "2-digit", minute: "2-digit" }).format(d);
+      }
+      // Locale-aware fixed decimals: 4.4 in English, 4,4 in French.
+      function fmt(n, dec) {
+        if (n === null || n === undefined || isNaN(n)) return "–";
+        return n.toLocaleString(loc(), { minimumFractionDigits: dec, maximumFractionDigits: dec });
+      }
+
+      /* ---------- state & fetching ---------- */
+      var cache = {};           // sectorId -> { fetchedAt, days: [scoreDay...] }
+      var currentSector = SECTORS[0];
+      var currentDay = 0;
+      var lastError = null;     // { key, vars } for re-rendering the error in another language
+
+      var els = {};
+      ["updatedAt","refreshBtn","refreshNote","sectorCoords","sectorTabs","loadingState","errorState","errorMsg","retryBtn","content",
+       "heroDayLabel","heroSector","heroBadge","heroBadgeText","heroStars","starFill","heroVerdict",
+       "factWindow","factRh","factRain24","factRain48","dayCards","detailTitle","statWindow","statWindowNote",
+       "statRh","statRain24","statRain24Note","statRain48","statDamp","statPeak","statPeakNote","peakLine",
+       "compBars","hourRows"].forEach(function (id) { els[id] = document.getElementById(id); });
+
+      function apiUrl(sector) {
+        return "https://api.open-meteo.com/v1/forecast?latitude=" + sector.lat + "&longitude=" + sector.lon +
+          "&hourly=temperature_2m,relative_humidity_2m,dew_point_2m,precipitation,cloud_cover,wind_speed_10m" +
+          "&past_days=2&forecast_days=5&timezone=Europe%2FParis&_=" + Date.now();
+      }
+      function fetchErr(key, vars) { var e = new Error(key); e.i18n = { key: key, vars: vars }; return e; }
+
+      function fetchForecastOnce(sector) {
+        var opts = { cache: "no-store" };
+        var ctrl = null, timer = null;
+        if (typeof AbortController !== "undefined") {
+          ctrl = new AbortController();
+          opts.signal = ctrl.signal;
+          timer = setTimeout(function () { ctrl.abort(); }, 12000);
+        }
+        return fetch(apiUrl(sector), opts)
+          .then(function (r) {
+            if (timer) clearTimeout(timer);
+            if (!r.ok) throw fetchErr("err.http", { s: r.status });
+            return r.json();
+          })
+          .catch(function (err) {
+            if (timer) clearTimeout(timer);
+            if (err && err.i18n) throw err;
+            if (err && err.name === "AbortError") throw fetchErr("err.timeout");
+            throw fetchErr("err.network");
+          });
+      }
+      function fetchForecast(sector) {
+        return fetchForecastOnce(sector).catch(function () {
+          // One retry after a short pause — transient drops are common on mobile.
+          return new Promise(function (resolve) { setTimeout(resolve, 1500); })
+            .then(function () { return fetchForecastOnce(sector); });
+        });
+      }
+
+      /* ---------- refresh outcome notice ---------- */
+      var noteTimer = null;
+      function showNote(kind, bold, rest, autoHideMs) {
+        if (noteTimer) { clearTimeout(noteTimer); noteTimer = null; }
+        els.refreshNote.replaceChildren();
+        els.refreshNote.className = "refresh-note" + (kind ? " " + kind : "");
+        var b = document.createElement("b"); b.textContent = bold;
+        els.refreshNote.appendChild(b);
+        els.refreshNote.appendChild(document.createTextNode(rest));
+        els.refreshNote.hidden = false;
+        if (autoHideMs) noteTimer = setTimeout(function () { els.refreshNote.hidden = true; }, autoHideMs);
+      }
+      function hideNote() {
+        if (noteTimer) { clearTimeout(noteTimer); noteTimer = null; }
+        els.refreshNote.hidden = true;
+      }
+
+      function showState(which) {
+        els.loadingState.hidden = which !== "loading";
+        els.errorState.hidden = which !== "error";
+        els.content.hidden = which !== "content";
+      }
+      function renderError() {
+        if (!lastError) return;
+        els.errorMsg.textContent = t("errorWith", { e: t(lastError.key, lastError.vars) });
+      }
+
+      var refreshInFlight = false;
+      function loadSector(sector, force) {
+        // Ignore taps while a fetch is already running.
+        if (refreshInFlight) return Promise.resolve();
+        currentSector = sector;
+        renderTabs();
+        els.sectorCoords.textContent = sector.lat.toFixed(4) + ", " + sector.lon.toFixed(4) + " · bleau.info";
+        syncUrl();
+        var cached = cache[sector.id];
+        if (!force && cached && !isStale(cached)) {
+          render(cached);
+          return Promise.resolve();
+        }
+        // Keep showing older data while a refetch runs; otherwise spin.
+        if (cached) render(cached); else showState("loading");
+        refreshInFlight = true;
+        els.refreshBtn.classList.add("spinning");
+        els.refreshBtn.disabled = true;
+        if (force) showNote("", t("noteRefreshingB"), t("noteRefreshing"), 0);
+        // Re-anchor "today" at fetch time so a page left open overnight scores the right days.
+        var today = parisTodayStr();
+        var dates = [];
+        for (var di = 0; di < 4; di++) dates.push(addDays(today, di));
+        return fetchForecast(sector)
+          .then(function (data) {
+            var rows = buildRows(data);
+            var days = dates.map(function (d) { return scoreDay(rows, d); });
+            if (days.some(function (d) { return !d; })) throw fetchErr("err.coverage");
+            var entry = { days: days, fetchedAt: new Date() };
+            cache[sector.id] = entry;
+            refreshInFlight = false;
+            els.refreshBtn.classList.remove("spinning");
+            els.refreshBtn.disabled = false;
+            if (sector.id === currentSector.id) render(entry);
+            if (force) showNote("ok", t("noteUpdatedB", { t: parisTimeStr(entry.fetchedAt) }), t("noteUpdated"), 8000);
+            else hideNote();
+          })
+          .catch(function (err) {
+            refreshInFlight = false;
+            els.refreshBtn.classList.remove("spinning");
+            els.refreshBtn.disabled = false;
+            var existing = cache[sector.id];
+            if (existing) {
+              existing.liveFailed = true;
+              render(existing);
+              showNote("err", t("noteFailedB"), t("noteFailedHave", { t: parisTimeStr(existing.fetchedAt) }), 0);
+            } else {
+              lastError = (err && err.i18n) || { key: "err.network" };
+              renderError();
+              showState("error");
+              showNote("err", t("noteFailedB"), t("noteFailedNone"), 0);
+            }
+          });
+      }
+
+      /* ---------- rendering ---------- */
+      function applyStatic() {
+        document.documentElement.lang = lang;
+        document.title = t("title");
+        document.querySelectorAll("[data-i18n]").forEach(function (el) { el.textContent = t(el.getAttribute("data-i18n")); });
+        document.querySelectorAll("[data-i18n-html]").forEach(function (el) { el.innerHTML = t(el.getAttribute("data-i18n-html")); });
+        document.querySelectorAll("[data-i18n-aria]").forEach(function (el) { el.setAttribute("aria-label", t(el.getAttribute("data-i18n-aria"))); });
+        document.querySelectorAll(".lang-toggle button").forEach(function (b) {
+          b.setAttribute("aria-pressed", b.getAttribute("data-lang") === lang ? "true" : "false");
+        });
+      }
+
+      function renderTabs() {
+        els.sectorTabs.replaceChildren();
+        SECTORS.forEach(function (s) {
+          var b = document.createElement("button");
+          b.type = "button";
+          b.className = "sector-tab";
+          b.setAttribute("aria-pressed", s.id === currentSector.id ? "true" : "false");
+          var n = document.createElement("span"); n.className = "s-name"; n.textContent = s.name;
+          var nt = document.createElement("span"); nt.className = "s-note"; nt.textContent = t("note." + s.id);
+          b.appendChild(n); b.appendChild(nt);
+          b.addEventListener("click", function () { loadSector(s, false); });
+          els.sectorTabs.appendChild(b);
+        });
+      }
+
+      function windowRange(day) {
+        var w = day.bestWindow;
+        var start = w[0].timeStr;
+        var endHour = w[w.length - 1].hour + 1;
+        return start + " – " + (endHour < 10 ? "0" : "") + endHour + ":00";
+      }
+      function miniStars(stars) {
+        var full = Math.round(stars);
+        var s = "";
+        for (var i = 0; i < 5; i++) s += i < full ? "★" : "☆";
+        return s;
+      }
+      function valWithUnit(el, value, unit) {
+        el.replaceChildren();
+        el.appendChild(document.createTextNode(value));
+        var s = document.createElement("small"); s.textContent = unit; el.appendChild(s);
+      }
+
+      function render(entry) {
+        showState("content");
+        els.updatedAt.replaceChildren();
+        els.updatedAt.appendChild(document.createTextNode(t("fetched")));
+        var b = document.createElement("b"); b.textContent = t("parisTime", { t: parisTimeStr(entry.fetchedAt) });
+        els.updatedAt.appendChild(b);
+        if (entry.liveFailed) els.updatedAt.appendChild(document.createTextNode(t("fetchedFailed")));
+
+        // day cards
+        els.dayCards.replaceChildren();
+        entry.days.forEach(function (day, idx) {
+          var lab = dayLabel(day.dateStr, idx);
+          var card = document.createElement("button");
+          card.type = "button";
+          card.className = "day-card";
+          card.setAttribute("aria-pressed", idx === currentDay ? "true" : "false");
+          var dName = document.createElement("div"); dName.className = "d-name"; dName.textContent = lab.name;
+          var dDate = document.createElement("div"); dDate.className = "d-date"; dDate.textContent = shortDate(day.dateStr);
+          var dScore = document.createElement("div"); dScore.className = "d-score";
+          var dStars = document.createElement("span"); dStars.className = "d-stars";
+          dStars.textContent = fmt(day.stars, 1);
+          var small = document.createElement("small"); small.textContent = "/5";
+          dStars.appendChild(small);
+          var dMini = document.createElement("span"); dMini.className = "d-mini"; dMini.textContent = miniStars(day.stars);
+          dScore.appendChild(dStars); dScore.appendChild(dMini);
+          var dVerdict = document.createElement("span"); dVerdict.className = "d-verdict " + day.verdict.kind;
+          var dot = document.createElement("span"); dot.className = "dot";
+          dVerdict.appendChild(dot);
+          dVerdict.appendChild(document.createTextNode(day.dampHours > 0 ? t("dampCard") : t("short." + day.verdict.kind)));
+          var dWindow = document.createElement("div"); dWindow.className = "d-window";
+          dWindow.textContent = t("cardBest", { w: windowRange(day), rh: Math.round(day.bestRh) });
+          card.appendChild(dName); card.appendChild(dDate); card.appendChild(dScore); card.appendChild(dVerdict); card.appendChild(dWindow);
+          card.addEventListener("click", function () { currentDay = idx; render(entry); });
+          els.dayCards.appendChild(card);
+        });
+
+        var day = entry.days[currentDay];
+        var lab2 = dayLabel(day.dateStr, currentDay);
+
+        // hero
+        els.heroDayLabel.textContent = lab2.full;
+        els.heroSector.textContent = currentSector.name;
+        els.heroBadge.className = "verdict-badge " + day.verdict.kind;
+        els.heroBadgeText.textContent = day.dampHours > 0 ? t("dampHero") : t("short." + day.verdict.kind);
+        els.heroStars.textContent = fmt(day.stars, 1);
+        els.starFill.style.width = (day.stars / 5 * 100) + "%";
+        els.heroVerdict.textContent = t("verdict." + day.verdict.key);
+        els.factWindow.textContent = windowRange(day);
+        valWithUnit(els.factRh, Math.round(day.bestRh) + "", t("pctAvg"));
+        valWithUnit(els.factRain24, fmt(day.rain24, 1), " mm");
+        valWithUnit(els.factRain48, fmt(day.rain48, 1), " mm");
+
+        // detail
+        els.detailTitle.textContent = t("detailTitle", { d: lab2.full });
+        els.statWindow.textContent = windowRange(day);
+        els.statWindowNote.textContent = t("windowNote", { t: day.best.timeStr, s: fmt(day.best.score * 5, 1) });
+        els.statRh.textContent = Math.round(day.bestRh) + (lang === "fr" ? NB + "%" : "%");
+        valWithUnit(els.statRain24, fmt(day.rain24, 1) + " ", "mm");
+        els.statRain24Note.textContent = day.rain24 <= 0 ? t("rainNone") : (day.rain24 <= 1 ? t("rainTrace") : t("rainSoak"));
+        valWithUnit(els.statRain48, fmt(day.rain48, 1) + " ", "mm");
+        els.statDamp.textContent = day.dampHours + " / 3";
+        els.statPeak.textContent = day.best.timeStr;
+        els.statPeakNote.textContent = t("peakNote", { s: fmt(day.best.score * 5, 1) });
+        els.peakLine.replaceChildren();
+        var pb = document.createElement("b"); pb.textContent = t("peakLabel", { t: day.best.timeStr });
+        els.peakLine.appendChild(pb);
+        els.peakLine.appendChild(document.createTextNode(t("peakLine", {
+          temp: fmt(day.best.temp, 0), rh: Math.round(day.best.rh), dew: fmt(day.best.dew, 0),
+          wind: fmt(day.best.wind, 0), cloud: Math.round(day.best.cloud)
+        })));
+
+        // component bars
+        var comps = [
+          { key: "temp", p: 35 }, { key: "humidity", p: 25 }, { key: "dryness", p: 25 },
+          { key: "sun", p: 10 }, { key: "wind", p: 5 }
+        ];
+        els.compBars.replaceChildren();
+        comps.forEach(function (c) {
+          var val = day.compAvg[c.key];
+          var row = document.createElement("div"); row.className = "comp-row";
+          var nm = document.createElement("div"); nm.className = "comp-name"; nm.textContent = t("comp." + c.key);
+          var wspan = document.createElement("span"); wspan.textContent = t("ofScore", { p: c.p }); nm.appendChild(wspan);
+          var bar = document.createElement("div"); bar.className = "comp-bar";
+          var fill = document.createElement("i"); fill.style.width = Math.round(val * 100) + "%";
+          bar.appendChild(fill);
+          var vv = document.createElement("div"); vv.className = "comp-val"; vv.textContent = fmt(val * 5, 1) + "/5";
+          row.appendChild(nm); row.appendChild(bar); row.appendChild(vv);
+          els.compBars.appendChild(row);
+        });
+
+        // hourly rows
+        els.hourRows.replaceChildren();
+        var bestSet = {};
+        day.bestWindow.forEach(function (h) { bestSet[h.timeStr] = true; });
+        day.climb.forEach(function (h) {
+          var row = document.createElement("div");
+          row.className = "hour-row" + (h.damp ? " is-damp" : (bestSet[h.timeStr] ? " is-best" : ""));
+          var tCell = document.createElement("div"); tCell.className = "h-time"; tCell.textContent = h.timeStr;
+          if (bestSet[h.timeStr] && !h.damp) {
+            var tag = document.createElement("span"); tag.className = "best-tag"; tag.textContent = t("bestTag");
+            tCell.appendChild(tag);
+          }
+          var sCell = document.createElement("div"); sCell.className = "h-score";
+          var bar = document.createElement("div"); bar.className = "h-bar";
+          var fill = document.createElement("i");
+          var sv = h.score * 5;
+          fill.className = h.damp ? "nogo" : (sv >= 3.5 ? "go" : (sv >= 2.5 ? "marginal" : "nogo"));
+          fill.style.width = (sv / 5 * 100) + "%";
+          bar.appendChild(fill);
+          var num = document.createElement("span"); num.className = "h-num"; num.textContent = fmt(sv, 1);
+          sCell.appendChild(bar); sCell.appendChild(num);
+          var mCell = document.createElement("div"); mCell.className = "h-metrics";
+          var line1 = document.createElement("b"); line1.textContent = fmt(h.temp, 0) + (lang === "fr" ? NB : " ") + "°C";
+          mCell.appendChild(line1);
+          mCell.appendChild(document.createTextNode(t("hourLine1", { rh: Math.round(h.rh), dew: fmt(h.dew, 0) })));
+          mCell.appendChild(document.createElement("br"));
+          mCell.appendChild(document.createTextNode(t("hourLine2", { w: fmt(h.wind, 0), c: Math.round(h.cloud), r: fmt(h.precip, 1) })));
+          if (h.damp) {
+            var badge = document.createElement("span"); badge.className = "damp-badge"; badge.textContent = t("dampBadge");
+            mCell.appendChild(badge);
+          }
+          row.appendChild(tCell); row.appendChild(sCell); row.appendChild(mCell);
+          els.hourRows.appendChild(row);
+        });
+      }
+
+      /* ---------- language switch ---------- */
+      function setLang(next) {
+        if (!STR[next] || next === lang) return;
+        lang = next;
+        try { localStorage.setItem("bleauscore.lang", lang); } catch (e) {}
+        applyStatic();
+        renderTabs();
+        syncUrl();
+        hideNote();
+        var c = cache[currentSector.id];
+        if (!els.content.hidden && c) render(c);
+        if (!els.errorState.hidden) renderError();
+      }
+      document.querySelectorAll(".lang-toggle button").forEach(function (b) {
+        b.addEventListener("click", function () { setLang(b.getAttribute("data-lang")); });
+      });
+
+      /* ---------- shareable links & staying fresh ---------- */
+      // URL carries both: ?lang=fr#apremont — so a shared link opens the same view.
+      function syncUrl() {
+        if (!history.replaceState) return;
+        try {
+          var u = new URL(location.href);
+          u.searchParams.set("lang", lang);
+          u.hash = currentSector.id;
+          if (u.href !== location.href) history.replaceState(null, "", u.href);
+        } catch (e) {}
+      }
+      var STALE_MS = 30 * 60 * 1000;
+      function isStale(entry) { return Date.now() - entry.fetchedAt.getTime() > STALE_MS; }
+      function sectorFromHash() {
+        var id = (location.hash || "").replace(/^#/, "").toLowerCase();
+        for (var i = 0; i < SECTORS.length; i++) if (SECTORS[i].id === id) return SECTORS[i];
+        return null;
+      }
+      window.addEventListener("hashchange", function () {
+        var s = sectorFromHash();
+        if (s && s.id !== currentSector.id) loadSector(s, false);
+      });
+      document.addEventListener("visibilitychange", function () {
+        if (document.visibilityState !== "visible") return;
+        var c = cache[currentSector.id];
+        if (c && isStale(c)) loadSector(currentSector, true);
+      });
+
+      els.refreshBtn.addEventListener("click", function () { loadSector(currentSector, true); });
+      els.retryBtn.addEventListener("click", function () { loadSector(currentSector, true); });
+
+      applyStatic();
+      loadSector(sectorFromHash() || currentSector, false);
+    </script>
+  </body>
+</html>
